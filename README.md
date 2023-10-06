@@ -46,7 +46,7 @@ To rebase an existing Silverblue/Kinoite installation to the latest build:
 
 - First rebase to the unsigned image, to get the proper signing keys and policies installed:
   ```
-  sudo rpm-ostree rebase ostree-unverified-registry:ghcr.io/ublue-os/startingpoint:latest
+  sudo rpm-ostree rebase ostree-unverified-registry:ghcr.io/hikariknight/deckstation:latest
   ```
 - Reboot to complete the rebase:
   ```
@@ -54,7 +54,7 @@ To rebase an existing Silverblue/Kinoite installation to the latest build:
   ```
 - Then rebase to the signed image, like so:
   ```
-  sudo rpm-ostree rebase ostree-image-signed:docker://ghcr.io/ublue-os/startingpoint:latest
+  sudo rpm-ostree rebase ostree-image-signed:docker://ghcr.io/hikariknight/deckstation:latest
   ```
 - Reboot again to complete the installation
   ```
@@ -64,7 +64,7 @@ To rebase an existing Silverblue/Kinoite installation to the latest build:
 This repository builds date tags as well, so if you want to rebase to a particular day's build:
 
 ```
-sudo rpm-ostree rebase ostree-image-signed:docker://ghcr.io/ublue-os/startingpoint:20230403
+sudo rpm-ostree rebase ostree-image-signed:docker://ghcr.io/hikariknight/deckstation:20230403
 ```
 
 This repository by default also supports signing.
@@ -87,12 +87,10 @@ The [`just`](https://just.systems/) command runner is included in all `ublue-os/
 
 You need to have a `~/.justfile` with the following contents and `just` aliased to `just --unstable` (default in posix-compatible shells on ublue) to get started with just locally.
 ```
-!include /usr/share/ublue-os/just/main.just
-!include /usr/share/ublue-os/just/nvidia.just
-!include /usr/share/ublue-os/just/custom.just
+!include /usr/share/ublue-os/justfile
 ```
 Then type `just` to list the just recipes available.
 
-The file `/usr/share/ublue-os/just/custom.just` is intended for the custom just commands (recipes) you wish to include in your image. By default, it includes the justfiles from [`ublue-os/bling`](https://github.com/ublue-os/bling), if you wish to disable that, you need to just remove the line that includes bling.just.
+The file `/usr/share/ublue-os/just/60-custom.just` is intended for the custom just commands (recipes) you wish to include in your image. By default, it includes the justfiles from [`ublue-os/bling`](https://github.com/ublue-os/bling), if you wish to disable that, you need to just remove the line that includes bling.just.
 
 See [the just-page in the Universal Blue documentation](https://universal-blue.org/guide/just/) for more information.
