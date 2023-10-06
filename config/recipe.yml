@@ -1,10 +1,10 @@
 # image will be published to ghcr.io/<user>/<name>
-name: startingpoint
+name: DeckStation
 # description will be included in the image's metadata
-description: A starting point for further customization of uBlue images. Make your own! https://ublue.it/making-your-own/
+description: A workstation oriented version of bazzite desktop with native steam and gamescope
 
 # the base image to build on top of (FROM) and the version tag to use
-base-image: ghcr.io/ublue-os/silverblue-main
+base-image: ghcr.io/ublue-os/bazzite
 image-version: 38 # latest is also supported if you want new updates ASAP
 
 # module configuration, executed in order
@@ -51,3 +51,5 @@ modules:
     scripts:
       # this sets up the proper policy & signing files for signed images to work
       - signing.sh
+      # installs native steam
+      - native-steam.sh
