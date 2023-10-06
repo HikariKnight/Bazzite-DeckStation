@@ -10,7 +10,7 @@ sed -i 's@enabled=0@enabled=1@g' /etc/yum.repos.d/_copr_ycollet-audinux.repo
 
 # Install Steam and Lutris into their own OCI layer
 # Add bootstraplinux_ubuntu12_32.tar.xz used by gamescope-session (Thanks ChimeraOS! - https://chimeraos.org/)
-RUN rpm-ostree install \
+rpm-ostree install \
         mesa-dri-drivers.i686 \
         mesa-vulkan-drivers.i686 \
         vulkan-loader.i686 \
