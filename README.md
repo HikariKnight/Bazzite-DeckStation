@@ -1,11 +1,9 @@
-# Starting point
+# Bazzite DeckStation
 
 > **Warning**
-> Startingpoint was recently rewritten, and this version is considered a "1.0" *semi-*stable release.
-> There are breaking changes between this and the previous version.
-> If you are merging changes from the previous (v0) version, please refer to [the heads-up blog post](https://universal-blue.org/blog/2023/09/02/startingpoint-rewrite-heads-up-what-you-need-to-know/).
+> This is a custom OCI image made specifically as a desktop first version of the `bazzite-deck` image but for my own personal system due to some incompatibilities with the deck image.
 
-[![build-ublue](https://github.com/ublue-os/startingpoint/actions/workflows/build.yml/badge.svg)](https://github.com/ublue-os/startingpoint/actions/workflows/build.yml)
+[![build-ublue](https://github.com/hikariknight/bazzite-deckstation/actions/workflows/build.yml/badge.svg)](https://github.com/hikariknight/bazzite-deckstation/actions/workflows/build.yml)
 
 This is a constantly updating template repository for creating [a native container image](https://fedoraproject.org/wiki/Changes/OstreeNativeContainerStable) designed to be customized however you want. GitHub will build your image for you, and then host it for you on [ghcr.io](https://github.com/features/packages). You then just tell your computer to boot off of that image. GitHub keeps 90 days worth image backups for you, thanks Microsoft!
 
