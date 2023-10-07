@@ -20,7 +20,7 @@ rpm-ostree override replace \
         mesa-libGL \
         mesa-libglapi \
         mesa-vulkan-drivers && \
-if [ ${FEDORA_MAJOR_VERSION} -lt 39 ]; then \
+if [ ${OS_VERSION} -lt 39 ]; then \
     rpm-ostree override replace \
     --experimental \
     --from repo=copr:copr.fedorainfracloud.org:kylegospo:bazzite \
