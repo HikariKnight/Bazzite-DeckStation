@@ -36,6 +36,7 @@ sed -i 's@enabled=0@enabled=1@g' /etc/yum.repos.d/_copr_ycollet-audinux.repo
 #     pipewire-alsa.i686 && \
 
 rpm-ostree install \
+    vulkan-loader.i686 \
     alsa-lib.i686 \
     fontconfig.i686 \
     gtk2.i686 \
