@@ -1,7 +1,9 @@
 # Bazzite DeckStation
 
 > **Warning**
-> This is a custom OCI image made specifically as a desktop first version of the `bazzite-deck` image but for my own personal system due to some incompatibilities with the deck image.
+> This is a custom OCI image made specifically as a desktop/workstation first version of the `bazzite-deck` image but for my own personal system due to some incompatibilities with the deck image.
+>
+> It disables autologin to gamescope-session, removes the virtual keyboard on SDDM and "exit to desktop" from within gamescope-session will take you back to sddm.
 
 [![build-ublue](https://github.com/hikariknight/bazzite-deckstation/actions/workflows/build.yml/badge.svg)](https://github.com/hikariknight/bazzite-deckstation/actions/workflows/build.yml)
 
