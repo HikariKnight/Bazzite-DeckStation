@@ -52,4 +52,4 @@ modules:
       # this sets up the proper policy & signing files for signed images to work
       - signing.sh
       # installs native steam
-      - native-steam-simple.sh
+      - deckstation-setup.sh
