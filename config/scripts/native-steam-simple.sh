@@ -45,6 +45,9 @@ rpm-ostree install \
     lutris \
     wxGTK \
     libFAudio \
+    gamescope \
+    gamescope-session \
+    mangohud \
     wine-core \
     winetricks \
     protontricks
