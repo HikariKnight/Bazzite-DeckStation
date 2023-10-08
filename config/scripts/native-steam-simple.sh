@@ -53,6 +53,7 @@ rpm-ostree install \
     wxGTK \
     libFAudio \
     gamescope \
+    gamescope-session \
     mangohud \
     wine-core \
     winetricks \
