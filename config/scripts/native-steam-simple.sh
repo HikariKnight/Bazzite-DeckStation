@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -oue pipefail
 
-sed -i 's@enabled=0@enabled=1@g' /etc/yum.repos.d/_copr_kylegospo-bazzite.repo && \
-sed -i 's@enabled=0@enabled=1@g' /etc/yum.repos.d/_copr_kylegospo-bazzite-multilib.repo && \
+#sed -i 's@enabled=0@enabled=1@g' /etc/yum.repos.d/_copr_kylegospo-bazzite.repo && \
+#sed -i 's@enabled=0@enabled=1@g' /etc/yum.repos.d/_copr_kylegospo-bazzite-multilib.repo && \
 sed -i 's@enabled=0@enabled=1@g' /etc/yum.repos.d/_copr_kylegospo-hl2linux-selinux.repo && \
 sed -i 's@enabled=0@enabled=1@g' /etc/yum.repos.d/_copr_kylegospo-obs-vkcapture.repo && \
 sed -i 's@enabled=0@enabled=1@g' /etc/yum.repos.d/_copr_kylegospo-wallpaper-engine-kde-plugin.repo && \
@@ -48,11 +48,15 @@ rpm-ostree install \
     libXinerama.i686 \
     libXtst.i686 \
     libXScrnSaver.i686 \
+    mesa-libGL.i686 \
+    mesa-libEGL.i686 \
     NetworkManager-libnm.i686 \
     nss.i686 \
     pulseaudio-libs.i686 \
     libcurl.i686 \
     systemd-libs.i686 \
+    libva.i686 \
+    libvdpau.i686 \
     libdbusmenu-gtk3.i686 \
     libatomic.i686 \
     pipewire-alsa.i686 && \
