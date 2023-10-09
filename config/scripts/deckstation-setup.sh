@@ -6,4 +6,7 @@ rm /usr/etc/sddm.conf.d/steamos.conf
 
 # Remove virtual keyboard on SDDM
 # as this image is for workstations and permanently docked steamdecks
-rm /usr/etc/sddm.conf.d/virtualkbd.conf
+rm /usr/etc/sddm.conf.d/virtualkbd.confi
+
+# Create SELinux context so libvirt can use looking-glass shm
+semanage fcontext -a -t svirt_tmpfs_t /dev/shm/looking-glass
