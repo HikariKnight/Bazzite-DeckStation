@@ -9,7 +9,7 @@ rm /usr/etc/sddm.conf.d/steamos.conf
 rm /usr/etc/sddm.conf.d/virtualkbd.conf
 
 # Add deckstation justfile to 60-custom.just
-echo '!include /usr/share/ublue-os/just/65-deckstation.just' >> /usr/share/ublue-os/just/60-custom.just
+echo '!include /usr/share/ublue-os/just/65-deckstation.just' >> /usr/share/ublue-os/justfile
 
 # Create SELinux context so libvirt can use looking-glass shm
 semanage fcontext -a -t svirt_tmpfs_t /dev/shm/looking-glass
