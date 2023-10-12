@@ -13,3 +13,7 @@ echo '!include /usr/share/ublue-os/just/65-deckstation.just' >> /usr/share/ublue
 
 # Create SELinux context so libvirt can use looking-glass shm
 semanage fcontext -a -t svirt_tmpfs_t /dev/shm/looking-glass
+
+# Undo some bazzite-deck specific services we do not need anymore
+systemctl disable bazzite-autologin.service && \
+systemctl enable ublue-update.timer
