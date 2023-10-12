@@ -6,6 +6,17 @@
 #  under the terms of the GNU Lesser General Public License as published by
 #  the Free Software Foundation; either version 2.1 of the License, or
 #  (at your option) any later version.
+#
+#  With this unit file enabled you can set 1GB hugepages using kernel args
+#  and have them auto mounted, just as you would with 2MB hugepages.
+#
+#  For normal systems use "hugepagesz=1G hugepages=16"
+#  to allocate 16 hugepages with a pagesize of 1GB
+#  
+#  For systems with numa nodes use "hugepagesz=1G hugepages=0:16"
+#  to allocate 16 hugepages on numa node 0 with a pagesize of 1GB
+# 
+#  For more info, consult the kernel.org documentation linked in this file
 
 [Unit]
 Description=1GB Huge Pages File System
