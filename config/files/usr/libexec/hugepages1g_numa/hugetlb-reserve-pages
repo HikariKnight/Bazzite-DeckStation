@@ -4,7 +4,7 @@
 # On a system without numa nodes, using kernel arguments will work fine.
 
 # Change the values in /etc/default/hugepages_numa to edit values here
-source /etc/default/hugepages_numa
+source /etc/default/hugepages
 # NODES=(numanode numanode numanode)
 # PAGES=how many 1GB pages to reserve per numa node
 
