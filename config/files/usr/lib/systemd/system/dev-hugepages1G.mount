@@ -1,11 +1,4 @@
-#  SPDX-License-Identifier: LGPL-2.1-or-later
-#
 #  This file is a modified version of dev-hugepages.mount from systemd.
-#
-#  systemd is free software; you can redistribute it and/or modify it
-#  under the terms of the GNU Lesser General Public License as published by
-#  the Free Software Foundation; either version 2.1 of the License, or
-#  (at your option) any later version.
 #
 #  With this unit file enabled you can set 1GB hugepages using kernel args
 #  and have them auto mounted, just as you would with 2MB hugepages.
