@@ -1,0 +1,164 @@
+#!/usr/bin/env bash
+
+IMAGE_INFO="/usr/share/ublue-os/image-info.json"
+IMAGE_NAME=$(jq -r '."image-name"' < $IMAGE_INFO)
+IMAGE_FLAVOR=$(jq -r '."image-flavor"' < $IMAGE_INFO)
+BASE_IMAGE_NAME=$(jq -r '."base-image-name"' < $IMAGE_INFO)
+FEDORA_VERSION=$(jq -r '."fedora-version"' < $IMAGE_INFO)
+
+# SCRIPT VERSION
+HWS_VER=13
+HWS_VER_FILE="/etc/bazzite/hws_version"
+HWS_VER_RAN=$(cat $HWS_VER_FILE)
+
+# IMAGE IDENTIFIERS
+KNOWN_IMAGE_NAME_FILE="/etc/bazzite/image_name"
+KNOWN_IMAGE_NAME=$(cat $KNOWN_IMAGE_NAME_FILE)
+KNOWN_IMAGE_FLAVOR_FILE="/etc/bazzite/image_flavor"
+KNOWN_IMAGE_FLAVOR=$(cat $KNOWN_IMAGE_FLAVOR_FILE)
+KNOWN_FEDORA_VERSION_FILE="/etc/bazzite/fedora_version"
+KNOWN_FEDORA_VERSION=$(cat $KNOWN_FEDORA_VERSION_FILE)
+
+# RUN REMAINDER OF SCRIPT ONLY IF UPDATED
+if [[ -f $HWS_VER_FILE && $HWS_VER = $HWS_VER_RAN ]]; then
+  if [[ -f $KNOWN_IMAGE_NAME_FILE && -f $KNOWN_IMAGE_FLAVOR_FILE ]]; then
+    if [[ -f $KNOWN_FEDORA_VERSION_FILE && -f $KNOWN_FEDORA_VERSION_FILE ]]; then
+      # Run script if image has been rebased
+      if [[ $IMAGE_NAME = $KNOWN_IMAGE_NAME && $IMAGE_FLAVOR = $KNOWN_IMAGE_FLAVOR && $FEDORA_VERSION = $KNOWN_FEDORA_VERSION ]]; then
+        echo "Hardware setup has already run. Exiting..."
+        exit 0
+      fi
+    fi
+  fi
+fi
+
+# GLOBAL
+SYS_ID="$(cat /sys/devices/virtual/dmi/id/product_name)"
+GPU_ID=$(lspci -k | grep -A 3 -E "(VGA|3D)")
+KARGS=$(rpm-ostree kargs)
+NEEDED_KARGS=()
+INITRAMFS=$(rpm-ostree initramfs)
+NEEDED_INITRAMFS=("/etc/crypttab")
+NEEDS_INITRAMFS_APPLICATION=false
+
+# INITRAMFS
+echo "Current initramfs: $INITRAMFS"
+
+if [[ $IMAGE_FLAVOR =~ "nvidia" ]]; then
+  NEEDED_INITRAMFS+=("/etc/modprobe.d/nvidia.conf")
+else
+  NEEDED_INITRAMFS+=("/etc/modprobe.d/amdgpu.conf")
+fi
+
+if [[ $IMAGE_NAME =~ "deck" || $IMAGE_NAME =~ "ally" || $IMAGE_NAME =~ "framegame" ]]; then
+  NEEDED_INITRAMFS+=("/etc/modprobe.d/deck-blacklist.conf")
+fi
+
+for INITRAMFS_ARG in ${NEEDED_INITRAMFS[@]}; do
+  if [[ ! $INITRAMFS =~ "$INITRAMFS_ARG" ]]; then
+    NEEDS_INITRAMFS_APPLICATION=true
+  fi
+done
+
+if $NEEDS_INITRAMFS_APPLICATION; then
+  echo "Found needed initramfs changes, applying the following: ${NEEDED_INITRAMFS[*]}"
+  plymouth display-message --text="Updating initramfs - Please wait, this may take a while" || true
+  # Make sure we do not break an existing vfio setup
+  if [[ $INITRAMFS =~ "--add-drivers vfio vfio_iommu_type1 vfio-pci" ]]; then
+    echo test
+    rpm-ostree initramfs --enable --arg="-I ${NEEDED_INITRAMFS[*]}" --arg="--add-drivers" --arg="vfio vfio_iommu_type1 vfio-pci"
+  else
+    rpm-ostree initramfs --enable --arg="-I ${NEEDED_INITRAMFS[*]}"
+  fi
+else
+  echo "No initramfs changes needed"
+fi
+
+# KERNEL ARGUMENTS
+echo "Current kargs: $KARGS"
+
+if [[ ":Jupiter:" =~ ":$SYS_ID:" ]]; then
+  echo "Checking for needed karg changes (Jupiter)"
+
+  if [[ ! $KARGS =~ "amd_pstate" ]]; then
+    NEEDED_KARGS+=("--append-if-missing=amd_pstate=active")
+  fi
+
+  if [[ ! $KARGS =~ "amd_iommu" ]]; then
+    NEEDED_KARGS+=("--append-if-missing=amd_iommu=off")
+  fi
+
+  if [[ ! $KARGS =~ "amdgpu.gttsize" ]]; then
+    if [[ "$(awk '/MemTotal/{print $(NF-1)}' /proc/meminfo)" == "31664740" ]]; then
+      echo "32GB RAM Steam Deck detected"
+      NEEDED_KARGS+=("--append-if-missing=amdgpu.gttsize=16256")
+    else
+      NEEDED_KARGS+=("--append-if-missing=amdgpu.gttsize=8128")
+    fi
+  fi
+  
+  if [[ ! $KARGS =~ "initcall_blacklist" ]]; then
+    NEEDED_KARGS+=("--append-if-missing=initcall_blacklist=simpledrm_platform_driver_init")
+  fi
+fi
+
+if [[ $KARGS =~ "nomodeset" ]]; then
+  echo "Removing nomodeset"
+  NEEDED_KARGS+=("--delete-if-present=nomodeset")
+fi
+
+if [[ -n "$NEEDED_KARGS" ]]; then
+  echo "Found needed karg changes, applying the following: ${NEEDED_KARGS[*]}"
+  plymouth display-message --text="Updating kargs - Please wait, this may take a while" || true
+  rpm-ostree kargs ${NEEDED_KARGS[*]} --reboot || exit 1
+else
+  echo "No karg changes needed"
+fi
+
+if [[ $IMAGE_NAME =~ "deck" || $IMAGE_NAME =~ "ally" || $IMAGE_NAME =~ "framegame" ]]; then
+  if [[ ":Jupiter:" =~ ":$SYS_ID:" ]]; then
+    # Future updates to Deck on Jupiter here
+    echo "Jupiter hardware detected, skipping further setup..."
+  else
+    echo "Generic device detected. Performing setup..."
+    if [[ ":ROG Ally RC71L_RC71L:AYANEO GEEK:AYANEO 2:AYANEO 2S:AOKZOE A1 AR07:G1619-04:" =~ ":$SYS_ID:" ]]; then
+      echo "HandyGCCS supported handheld detected, enabling handycon & TDP control..."
+      systemctl enable --now handycon.service
+      sed -i 's/ENABLE_HARDWARE_CONTROL_ON_NON_DECK_HARDWARE=0/ENABLE_HARDWARE_CONTROL_ON_NON_DECK_HARDWARE=1/g' /etc/default/steam-hardware-control
+    fi
+    systemctl disable --now jupiter-fan-control.service
+    systemctl disable --now vpower.service
+    systemctl disable --now jupiter-biosupdate.service
+    systemctl disable --now jupiter-controller-update.service
+    systemctl disable --now ryzenadj.service
+    systemctl disable --now batterylimit.service
+    systemctl --global disable --now sdgyrodsu.service
+  fi
+fi
+
+# FSTAB CONFIGURATION
+if [[ $(grep "compress=zstd" /etc/fstab) ]]; then
+  echo "Applying fstab param adjustments"
+  if grep -q '64GB' <<< $(lsblk -o MODEL); then
+    echo "64GB eMMC detected"
+    sed -i 's/compress=zstd:1/noatime,lazytime,discard=sync,compress-force=zstd:3,space_cache=v2/g' /etc/fstab
+  else
+    sed -i 's/compress=zstd:1/noatime,lazytime,commit=120,discard=async,compress-force=zstd:1,space_cache=v2/g' /etc/fstab
+  fi
+else
+  echo "No fstab param adjustments needed"
+fi
+
+# HOSTNAME FIX
+# If the hostname is too long Distrobox will fail during setup
+# Additonally, Anaconda likes to set the hostname to be the ipv6 address
+# Let's check the length and reset it to something sensible if that happens.
+if (( $(hostname | wc -m) > 16 )); then
+  hostnamectl set-hostname bazzite
+fi
+
+mkdir -p /etc/bazzite
+#echo $HWS_VER > $HWS_VER_FILE
+#echo $IMAGE_NAME > $KNOWN_IMAGE_NAME_FILE
+#echo $IMAGE_FLAVOR > $KNOWN_IMAGE_FLAVOR_FILE
+#echo $FEDORA_VERSION > $KNOWN_FEDORA_VERSION_FILE
