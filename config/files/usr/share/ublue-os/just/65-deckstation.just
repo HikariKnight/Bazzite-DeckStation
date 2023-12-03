@@ -1,4 +1,4 @@
-# Include some of your custom scripts here!
+# Apply selinux context for looking-glass
 selinux-looking-glass:
   sudo semanage fcontext -a -t svirt_tmpfs_t /dev/shm/looking-glass
 
