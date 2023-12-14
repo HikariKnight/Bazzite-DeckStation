@@ -4,6 +4,7 @@ selinux-looking-glass:
 
 # Enable Virtualization and add workaround for a specific windows VM crash
 enable-virtualization:
+    #!/usr/bin/env bash
     virt_test=$(rpm-ostree status | grep -A 4 "●" | grep "virt-manager")
     if [[ -z ${virt_test} ]]; then
       echo "Installing QEMU and virt-manager..."
