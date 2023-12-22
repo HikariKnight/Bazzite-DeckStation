@@ -24,6 +24,9 @@ modules:
       # - micro
       # - starship
       - ibus-uniemoji
+      - qemu
+      - virt-manager
+      - edk2-ovmf
     remove:
       # - firefox # default firefox removed in favor of flatpak
       # - firefox-langpacks # langpacks needs to also be removed to prevent dependency problems
