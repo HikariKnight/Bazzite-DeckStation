@@ -1,40 +1,28 @@
-# Apply selinux context for looking-glass
-selinux-looking-glass:
-    sudo semanage fcontext -a -t svirt_tmpfs_t /dev/shm/looking-glass
-
-# Enable Virtualization and add workaround for a specific windows VM crash
-enable-virtualization:
-    #!/usr/bin/env bash
-    virt_test=$(rpm-ostree status | grep -A 4 "●" | grep "virt-manager")
-    if [[ -z ${virt_test} ]]; then
-      echo "Installing QEMU and virt-manager..."
-      rpm-ostree install virt-manager edk2-ovmf qemu
-      rpm-ostree kargs \
-      --append-if-missing="kvm.ignore_msrs=1" \
-      --append-if-missing="kvm.report_ignored_msrs=0"
-      echo 'Please re-run "ujust enable-virtualization" after the reboot to finish setup'
-    else
-      echo "Enabling libvirtd service"
-      sudo systemctl enable --now libvirtd
-      echo "libvirtd enabled! If virt-manager says libvirtd.sock is not available after a big update, re-run this command."
-    fi
+tr-kargs:
+    rpm-ostree kargs \
+          --append-if-missing="pci=noaer" \
+          --append-if-missing="processor.max_cstate=1" \
+          --append-if-missing="idle=nomwait" \
+          --append-if-missing="rcu_nocbs=0-15" \
+          --append-if-missing="usbcore.autosuspend=-1" \
+          --append-if-missing="pcie_aspm=off"
 
 # Enable VFIO on the system if virtualization is enabled
-enable-vfio:
+my-vfio:
     #!/usr/bin/env bash
     echo "Enabling VFIO..."
     VIRT_TEST=$(rpm-ostree kargs)
     CPU_VENDOR=$(grep "vendor_id" "/proc/cpuinfo" | uniq | awk -F": " '{ print $2 }')
     VENDOR_KARG="unset"
-    INITRAMFS_ARGS=$(rpm-ostree status | grep -m 1 Initramfs | perl -pe "s/\s+(Initramfs: regenerate|Initramfs:)//" | perl -pe "s/ \'/--arg='/")
     if [[ ${VIRT_TEST} == *kvm.report_ignored_msrs* ]]; then
-      echo 'add_drivers+=" vfio vfio_iommu_type1 vfio-pci "' | sudo tee /etc/dracut.conf.d/vfio.conf
-      echo $(($(cat /etc/bazzite/hws_version)-1)) | sudo tee /etc/bazzite/hws_version
-      rpm-ostree initramfs --enable $INITRAMFS_ARGS
+      rpm-ostree initramfs \
+        --enable \
+        --arg="--add-drivers" \
+        --arg="vfio vfio_iommu_type1 vfio-pci"
       if [[ ${CPU_VENDOR} == "AuthenticAMD" ]]; then
         VENDOR_KARG="amd_iommu=on"
       elif [[ ${CPU_VENDOR} == "GenuineIntel" ]]; then
-        VENDOR_KARG="intel_iommu=on"  
+        VENDOR_KARG="intel_iommu=on"
       fi
       if [[ ${VENDOR_KARG} == "unset" ]]; then
         echo "Failed to get CPU vendor, exiting..."
@@ -45,6 +33,7 @@ enable-vfio:
           --append-if-missing="iommu=pt" \
           --append-if-missing="rd.driver.pre=vfio_pci" \
           --append-if-missing="vfio_pci.disable_vga=1" \
+          --append-if-missing="vfio_pci.ids=10de:10f9,10de:1ada,10de:1adb,10de:1f02"
         echo "VFIO enabled, make sure you enable IOMMU, VT-d or AMD-v in your BIOS!"
         echo "Please understand that since this is such a niche use case, support will be very limited!"
         echo "To add your unused/second GPU device ids to the vfio driver by running"
@@ -54,3 +43,4 @@ enable-vfio:
     else
       echo "Enable virtualization with just enable-virtualization before running just enable-vfio."
     fi
+
