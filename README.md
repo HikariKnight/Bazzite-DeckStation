@@ -1,3 +1,7 @@
+# Deckstation (old repo)
+This is the old repo for bazzite-deckstation which is now deprecated
+everything has been migrated to the [Deckstation](https://github.com/hikariknight/deckstation) repository
+
 # Legacy template [![build-ublue](https://github.com/blue-build/legacy-template/actions/workflows/build.yml/badge.svg)](https://github.com/blue-build/legacy-template/actions/workflows/build.yml)
 
 > **Warning**  
